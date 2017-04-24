@@ -1,0 +1,38 @@
+html, body, [data-reactroot] {
+    height: 100%;
+}
+
+.container {
+    height: 100%;
+    width: 95%;
+}
+
+.full-height {
+     height: 100%;
+ }
+
+.full-height-body {
+    height: calc(100% - 100px);
+}
+
+.top-menu {
+    height: 50px;
+    margin-bottom: 20px;
+}
+
+.left-zone {
+    height: 100%;
+}
+
+.right-zone {
+    height: 100%;
+    border: 1px solid;
+}
+
+.search-container {
+    margin: 10px 0px;
+}
+
+li.info {
+    color: red;
+}

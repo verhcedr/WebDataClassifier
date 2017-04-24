@@ -1,0 +1,7 @@
+spring:
+  http:
+    multipart: enabled
+
+wdc:
+  storage:
+    rootPath: C:/temp

@@ -1,0 +1,6 @@
+spring:
+  http:
+    multipart: enabled
+wdc:
+  storage:
+    rootPath: /var/lib/wdc/upload
