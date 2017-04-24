@@ -12,7 +12,14 @@ export default class NewRow extends Component {
 
     constructor (props) {
         super(props);
+        this.state = {
+            cname: '',
+            directory: ''
+        }
         this.handleRemoveClass = this.handleRemoveClass.bind(this);
+//        this.handleChangeName = this.handleChangeName.bind(this);
+//        this.handleChangeDirectory = this.handleChangeDirectory.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     handleRemoveClass () {
@@ -20,11 +27,19 @@ export default class NewRow extends Component {
       return false;
     }
 
+//
+//    handleChangeName(event) {
+//        this.setState({cname: event.target.value});
+//    }
+//
+//    handleChangeDirectory(event) {
+//        this.setState({directory: event.target.value});
+//    }
 
-    handleSubmit (e) {
-        e.preventDefault()
-        var cname = this.refs.cname.getDOMNode().value;
-        var directory = this.refs.directory.getDOMNode().value;
+
+    handleSubmit () {
+        var cname = document.getElementById('cname').value;
+        var directory =document.getElementById('directory').value;
         var newrow = {cname: cname, directory: directory};
         this.props.onRowSubmit( newrow );
 
@@ -37,7 +52,7 @@ export default class NewRow extends Component {
     render () {
         return (
             <div>
-                 <Form onSubmit={this.handleSubmit}>
+                 <Form>
                     <FormGroup controlId="cname">
                         <ControlLabel>Name</ControlLabel>
                         <FormControl componentClass="input"  placeholder="Enter name..." />
@@ -46,7 +61,7 @@ export default class NewRow extends Component {
                         <ControlLabel>Directory</ControlLabel>
                         <FormControl componentClass="input"  placeholder="Enter dir..." />
                     </FormGroup>
-                    <Button type="submit">Add</Button>
+                    <Button onClick={this.handleSubmit}>Add</Button>
                 </Form>
             </div>
         )

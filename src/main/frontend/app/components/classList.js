@@ -15,6 +15,7 @@ export default class ClassList extends Component {
     render () {
         var classList = [];
         var that = this; // TODO: Needs to find out why that = this made it work; Was getting error that onClassDelete is not undefined
+        console.log(this.props.clist)
         this.props.clist.forEach(function(classObj) {
             classList.push(<ClassObj key={classObj.cname} classObj={classObj} onClassDelete={that.handleClassRemove} /> );
         });

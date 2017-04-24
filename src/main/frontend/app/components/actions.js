@@ -37,8 +37,7 @@ export default class Actions extends Component {
 
     handleNewRowSubmit(newLine) {
         console.log(newLine)
-        this.setState( {classList: this.state.classList.push(newLine)} );
-        console.log(classList)
+        this.setState( {classList: this.state.classList.concat([newLine])} );
     }
     
     
