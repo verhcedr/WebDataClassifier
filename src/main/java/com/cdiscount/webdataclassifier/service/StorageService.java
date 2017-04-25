@@ -25,27 +25,26 @@ public class StorageService {
     private WdcProperties config;
 
     public String store(MultipartFile file, String dirName, List<String> rootToDirectory) {
-//        if (file.isEmpty()) {
-//            throw new RuntimeException("file upload is empty");
-//        }
-//
-//        // Create directories if needed
-//        String pathToDirectory = buildPathToDirectory(dirName, rootToDirectory);
-//        File pathToDirectoryFile = new File(pathToDirectory);
-//        pathToDirectoryFile.mkdirs();
-//
-//        File fileToWrite = new File(pathToDirectory + "/" + file.getOriginalFilename());
-//        /*if (fileToWrite.exists()) {
-//            throw new RuntimeException("file already exist");
-//        }*/
-//
+        if (file.isEmpty()) {
+            throw new RuntimeException("file upload is empty");
+        }
+
+        // Create directories if needed
+        String pathToDirectory = buildPathToDirectory(dirName, rootToDirectory);
+        File pathToDirectoryFile = new File(pathToDirectory);
+        pathToDirectoryFile.mkdirs();
+
+        File fileToWrite = new File(pathToDirectory + "/" + file.getOriginalFilename());
+        if (fileToWrite.exists()) {
+            throw new RuntimeException("file already exist");
+        }
+
 //        try {
 //            FileUtils.writeByteArrayToFile(fileToWrite, file.getBytes());
 //        } catch (IOException e) {
 //            throw new RuntimeException(e.getMessage(), e);
 //        }
-//        return fileToWrite.getAbsolutePath();
-        return null;
+        return fileToWrite.getAbsolutePath();
     }
 
     public Resource loadAsResource(String absolutePathToFile) {

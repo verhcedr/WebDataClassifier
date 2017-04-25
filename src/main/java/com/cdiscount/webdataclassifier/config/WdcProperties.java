@@ -11,8 +11,6 @@ public class WdcProperties {
         return storage;
     }
 
-
-
     public static class Storage {
         private String rootPath;
 

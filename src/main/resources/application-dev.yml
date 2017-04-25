@@ -3,4 +3,4 @@ spring:
     multipart: enabled
 wdc:
   storage:
-    rootPath: /var/lib/wdc/upload
+    rootPath: /home/cedricverhooste/temp

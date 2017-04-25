@@ -4,4 +4,4 @@ spring:
 
 wdc:
   storage:
-    rootPath: C:/temp
+    rootPath: /home/cedricverhooste/temp
