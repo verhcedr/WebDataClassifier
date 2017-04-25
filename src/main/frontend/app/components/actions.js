@@ -13,6 +13,7 @@ import Home from './home';
 import ClassList from './classList';
 import ClassObj from './class';
 import NewRow from './newRow';
+import ImageClassifier from './imageClassifier';
 const client = require('../api/client');
 
 export default class Actions extends Component {
@@ -23,12 +24,17 @@ export default class Actions extends Component {
         this.handleNewRowSubmit = this.handleNewRowSubmit.bind(this);
         this.handleClassRemove = this.handleClassRemove.bind(this);
         this.getClasses = this.getClasses.bind(this);
+        this.displayNextImage = this.displayNextImage.bind(this);
     }
 
     state = {
+        init : true,
         classList : [],
-        urls : ''
+        urls : '',
+        currentImage : {}
     }
+
+
 
     getClasses () {
         client({method: 'GET', path: '/api/classifier/all', params: {}}).done(response => {
@@ -46,8 +52,6 @@ export default class Actions extends Component {
         object["file"] = document.getElementById("file").files[0];
         object["classes"] = JSON.stringify(this.state.classList);
 
-        console.log(object);
-
         client({
             method: 'POST',
             path: '/api/classifier/upload',
@@ -55,13 +59,19 @@ export default class Actions extends Component {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-        }).then(
-            function(response) {
-                console.log("Rest response: ", response);
-            }, function(error) {
-                console.log("Error: ", error);
-            }
-        );
+        }).done(response => {
+            this.displayNextImage();
+        });
+    }
+
+    displayNextImage () {
+        client({method: 'GET', path: '/api/classifier/nextImage', params: {}}).done(response => {
+            console.log(response.entity)
+            this.setState({
+                init: false,
+                currentImage: response.entity
+            });
+        });
     }
 
     handleNewRowSubmit(newLine) {
@@ -85,8 +95,8 @@ export default class Actions extends Component {
     render () {
         return (
             <div>
-                 <div className="col-md-5">
-                    <Panel header="Images management">
+                 <div className="col-md-9">
+                    <Panel header="Images management" collapsible expanded={this.state.init}>
                     <Form onSubmit={this.launchClassification}>
                         <FormGroup controlId="file">
                             <ControlLabel>CSV File</ControlLabel>
@@ -100,8 +110,8 @@ export default class Actions extends Component {
                     </Form>
                     </Panel>
                  </div>
-                 <div className="col-md-5">
-                    <Panel header="Class management">
+                 <div className="col-md-9">
+                    <Panel header="Class management" collapsible expanded={this.state.init}>
                         <div className="col-md-5">
                             <NewRow onRowSubmit={this.handleNewRowSubmit}/>
                         </div>
@@ -111,7 +121,9 @@ export default class Actions extends Component {
                         </div>
                     </Panel>
                  </div>
-                 <Home />
+                 <ImageClassifier
+                        clist={this.state.classList}
+                        imageProduct={this.state.currentImage} />
              </div>
         )
     }

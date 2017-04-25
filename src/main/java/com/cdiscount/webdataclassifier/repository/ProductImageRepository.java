@@ -14,7 +14,7 @@ import java.util.Map;
 @Repository
 public class ProductImageRepository extends InMemoryCrudRepository<ProductImage, Long> {
 
-    private static int index = 0;
+    private int index = 0;
 
     @Override
     public void deleteAll() {
@@ -31,7 +31,7 @@ public class ProductImageRepository extends InMemoryCrudRepository<ProductImage,
         ProductImage productImage = null;
         if(index < count()) {
             productImage = Lists.newArrayList(findAll()).get(index);
-            index++;
+//            index++;
         }
         return productImage;
     }

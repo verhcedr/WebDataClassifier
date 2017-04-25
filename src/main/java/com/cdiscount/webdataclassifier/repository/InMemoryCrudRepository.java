@@ -12,7 +12,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public abstract class InMemoryCrudRepository<T, ID extends Serializable> implements CrudRepository<T, ID> {
 
-    private static Map mapImages = Maps.newLinkedHashMap();
+    private Map mapImages = Maps.newLinkedHashMap();
 
     @Override
     public <S extends T> S save(S entity) {

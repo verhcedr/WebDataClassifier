@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,13 +39,13 @@ public class ClassifierController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity storeData(@RequestParam("images") String imageUrls, @RequestParam("file") MultipartFile file, @RequestParam("classes") String classes) {
+    public ResponseEntity storeData(@RequestParam(name="images", required=false) String imageUrls, @RequestParam(name="file", required=false) MultipartFile file, @RequestParam("classes") String classes) {
         // Check and Parse CSV file
-        checkFile(file);
-        parseFileAndSaveProductImages(file);
+        if (checkFile(file))
+            parseFileAndSaveProductImages(file);
 
         // Manage urls from textarea
-        if(!imageUrls.isEmpty() && imageUrls.contains("http"))
+        if(StringUtils.isNoneEmpty(imageUrls) && imageUrls.contains("http"))
             Arrays.stream(imageUrls.split("\r\n"))
                 .map(url -> ProductImage.builder().imageUrl(url).build())
                 .forEach(classifierService::store);
@@ -54,10 +55,12 @@ public class ClassifierController {
         JSONArray classesArray = new JSONArray(classes);
         for (int i = 0; i < classesArray.length(); i++) {
             JSONObject current = classesArray.getJSONObject(i);
-            classObjs.add(ClassObj.builder()
-                    .cname(current.getString("cname"))
-                    .directory(current.getString("directory"))
-                    .build());
+            if(current.keySet().contains("cname")) {
+                classObjs.add(ClassObj.builder()
+                        .cname(current.getString("cname"))
+                        .directory(current.getString("directory"))
+                        .build());
+            }
         }
         classifierService.store(classObjs);
 
@@ -76,13 +79,18 @@ public class ClassifierController {
         }
     }
 
-    private void checkFile(@RequestParam("file") MultipartFile file) {
+    private boolean checkFile(@RequestParam("file") MultipartFile file) {
+        if(file == null) {
+            return false;
+        }
         if (file.isEmpty()) {
             throw new RuntimeException("file upload is empty");
         }
         if (!file.getName().endsWith(".csv")) {
             throw new RuntimeException("file must be a CSV");
         }
+
+        return true;
     }
 
     @GetMapping("/nextImage")
