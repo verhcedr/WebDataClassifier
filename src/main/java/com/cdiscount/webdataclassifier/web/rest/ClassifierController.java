@@ -85,7 +85,7 @@ public class ClassifierController {
         }
     }
 
-    @GetMapping("/newImage")
+    @GetMapping("/nextImage")
     public ProductImage getNextImage() {
         return classifierService.getNextProductImage();
     }

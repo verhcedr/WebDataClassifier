@@ -140,3 +140,16 @@ local.properties
 .scala_dependencies
 .worksheet
 
+Supprimerait docker/
+Supprimerait src/main/frontend/app/img/
+Supprimerait src/test/resources/
+Supprimerait target/classes/com/cdiscount/webdataclassifier/model/
+Supprimerait target/classes/com/cdiscount/webdataclassifier/repository/
+Supprimerait target/generated-sources/
+Supprimerait target/generated-test-sources/
+/.gitignore
+/src/main/frontend/node_modules/
+/target/
+/WebDataProcessing.iml
+/WebDataClassifier.iml
+/.idea/
