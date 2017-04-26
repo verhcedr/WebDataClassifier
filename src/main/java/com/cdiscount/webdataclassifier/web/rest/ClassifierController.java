@@ -1,16 +1,23 @@
 package com.cdiscount.webdataclassifier.web.rest;
 
+import com.cdiscount.webdataclassifier.config.WdcProperties;
 import com.cdiscount.webdataclassifier.model.ClassObj;
 import com.cdiscount.webdataclassifier.model.ProductImage;
 import com.cdiscount.webdataclassifier.service.ClassifierService;
 import com.cdiscount.webdataclassifier.service.StorageService;
+import com.cdiscount.webdataclassifier.util.Utils;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+import com.opencsv.bean.BeanToCsv;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,10 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,15 +38,21 @@ public class ClassifierController {
     private final ClassifierService classifierService;
 
     @Autowired
+    private WdcProperties properties;
+
+    @Autowired
     public ClassifierController(ClassifierService classifierService) {
         this.classifierService = classifierService;
     }
 
     @PostMapping("/upload")
     public ResponseEntity storeData(@RequestParam(name="images", required=false) String imageUrls, @RequestParam(name="file", required=false) MultipartFile file, @RequestParam("classes") String classes) {
+        // Reset images
+        classifierService.deleteAll();
+
         // Check and Parse CSV file
-        if (checkFile(file))
-            parseFileAndSaveProductImages(file);
+        if (Utils.checkFile(file))
+            Utils.parseFileAndSaveProductImages(file, classifierService);
 
         // Manage urls from textarea
         if(StringUtils.isNoneEmpty(imageUrls) && imageUrls.contains("http"))
@@ -67,32 +77,6 @@ public class ClassifierController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private void parseFileAndSaveProductImages(MultipartFile file) {
-        HeaderColumnNameMappingStrategy<ProductImage> strategy = new HeaderColumnNameMappingStrategy<>();
-        strategy.setType(ProductImage.class);
-        CsvToBean<ProductImage> csvToBean = new CsvToBean<>();
-
-        try (InputStreamReader reader = new InputStreamReader(file.getInputStream())) {
-            csvToBean.parse(strategy, new CSVReader(reader, ',')).forEach(classifierService::store);
-        } catch (IOException e) {
-            throw new RuntimeException("error in file parsing", e);
-        }
-    }
-
-    private boolean checkFile(@RequestParam("file") MultipartFile file) {
-        if(file == null) {
-            return false;
-        }
-        if (file.isEmpty()) {
-            throw new RuntimeException("file upload is empty");
-        }
-        if (!file.getName().endsWith(".csv")) {
-            throw new RuntimeException("file must be a CSV");
-        }
-
-        return true;
-    }
-
     @GetMapping("/nextImage")
     public ProductImage getNextImage() {
         return classifierService.getNextProductImage();
@@ -108,4 +92,18 @@ public class ClassifierController {
         classifierService.store(productImage);
     }
 
+    @GetMapping("/calculateProgress")
+    public Integer calculateProgress() {
+        return classifierService.calculateProgress();
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity exportResult() {
+        try {
+            Utils.writeProductImagesToCsv(properties.getStorage().getRootPath() + "/export.csv", classifierService.findAllProducts(), classifierService.findAllClasses());
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

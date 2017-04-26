@@ -13,6 +13,7 @@ public class WdcProperties {
 
     public static class Storage {
         private String rootPath;
+        private Boolean downloadImages;
 
         public String getRootPath() {
             return rootPath;
@@ -20,6 +21,14 @@ public class WdcProperties {
 
         public void setRootPath(String rootPath) {
             this.rootPath = rootPath;
+        }
+
+        public Boolean getDownloadImages() {
+            return downloadImages;
+        }
+
+        public void setDownloadImages(Boolean downloadImages) {
+            this.downloadImages = downloadImages;
         }
     }
 

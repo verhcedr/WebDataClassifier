@@ -7,6 +7,7 @@ import com.cdiscount.webdataclassifier.repository.ClassObjRepository;
 import com.cdiscount.webdataclassifier.repository.ProductImageRepository;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +36,8 @@ public class ClassifierService {
     private ProductImageRepository productImageRepository;
 
     public void store(ProductImage productImage) {
-        // If class is specified and
-        if (productImage.isImageDownloaded() && productImage.getClassObj() != null) {
+        // If option is enabled and class is specified, try to download image
+        if (properties.getStorage().getDownloadImages() && !productImage.isImageDownloaded() && productImage.getClassObj() != null) {
             downloadImage(productImage.getImageUrl(), buildImageDestinationDir(properties.getStorage().getRootPath(), productImage));
             productImage.setImageDownloaded(true);
         }
@@ -68,11 +69,6 @@ public class ClassifierService {
         File pathToDirectoryFile = new File(pathToDirectory);
         pathToDirectoryFile.mkdirs();
 
-        // Build image path
-        if(!pathToDirectory.endsWith("/")) {
-            pathToDirectory += "/";
-        }
-        pathToDirectory += productImage.getImageName();
         return pathToDirectory;
     }
 
@@ -94,4 +90,16 @@ public class ClassifierService {
         }
     }
 
+    public void deleteAll() {
+        productImageRepository.deleteAll();
+        classObjRepository.deleteAll();
+    }
+
+    public Integer calculateProgress() {
+        return productImageRepository.calculateProgress();
+    }
+
+    public List<ProductImage> findAllProducts() {
+        return Lists.newArrayList(productImageRepository.findAll());
+    }
 }

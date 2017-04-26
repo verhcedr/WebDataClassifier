@@ -3,4 +3,5 @@ spring:
     multipart: enabled
 wdc:
   storage:
+    downloadImages : true
     rootPath: /home/cedricverhooste/temp

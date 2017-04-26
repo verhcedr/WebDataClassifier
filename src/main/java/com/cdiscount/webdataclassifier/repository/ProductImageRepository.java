@@ -12,7 +12,7 @@ import java.util.Map;
  * Created by cedricverhooste on 25/04/17.
  */
 @Repository
-public class ProductImageRepository extends InMemoryCrudRepository<ProductImage, Long> {
+public class ProductImageRepository extends InMemoryCrudRepository<ProductImage, String> {
 
     private int index = 0;
 
@@ -23,16 +23,21 @@ public class ProductImageRepository extends InMemoryCrudRepository<ProductImage,
     }
 
     @Override
-    public Long getId(ProductImage entity) {
-        return entity.getId();
+    public String getId(ProductImage entity) {
+        return entity.getImageUrl();
     }
 
     public ProductImage getNextProductImage() {
         ProductImage productImage = null;
         if(index < count()) {
             productImage = Lists.newArrayList(findAll()).get(index);
-//            index++;
+            index++;
         }
         return productImage;
+    }
+
+    public Integer calculateProgress() {
+        float result = (index) * 100 / count();
+        return Math.round(result);
     }
 }

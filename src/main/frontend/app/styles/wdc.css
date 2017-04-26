@@ -29,8 +29,9 @@ html, body, [data-reactroot] {
     border: 1px solid;
 }
 
-.search-container {
-    margin: 10px 0px;
+.image-container {
+    max-width: 800px;
+    max-height: 600px;
 }
 
 li.info {

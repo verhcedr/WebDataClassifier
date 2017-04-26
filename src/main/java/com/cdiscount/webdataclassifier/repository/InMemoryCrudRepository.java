@@ -61,4 +61,5 @@ public abstract class InMemoryCrudRepository<T, ID extends Serializable> impleme
     public void deleteAll() { mapImages.clear(); }
 
     public abstract ID getId(T entity);
+
 }

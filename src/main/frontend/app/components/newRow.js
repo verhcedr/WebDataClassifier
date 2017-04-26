@@ -17,8 +17,6 @@ export default class NewRow extends Component {
             directory: ''
         }
         this.handleRemoveClass = this.handleRemoveClass.bind(this);
-//        this.handleChangeName = this.handleChangeName.bind(this);
-//        this.handleChangeDirectory = this.handleChangeDirectory.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
@@ -26,15 +24,6 @@ export default class NewRow extends Component {
       this.props.onClassDelete( this.props.classObj );
       return false;
     }
-
-//
-//    handleChangeName(event) {
-//        this.setState({cname: event.target.value});
-//    }
-//
-//    handleChangeDirectory(event) {
-//        this.setState({directory: event.target.value});
-//    }
 
 
     handleSubmit () {
@@ -52,15 +41,19 @@ export default class NewRow extends Component {
     render () {
         return (
             <div>
-                 <Form>
+                 <Form inline>
                     <FormGroup controlId="cname">
                         <ControlLabel>Name</ControlLabel>
+                        {' '}
                         <FormControl componentClass="input"  placeholder="Enter name..." />
                     </FormGroup>
+                    {' '}
                     <FormGroup controlId="directory">
                         <ControlLabel>Directory</ControlLabel>
+                        {' '}
                         <FormControl componentClass="input"  placeholder="Enter dir..." />
                     </FormGroup>
+                    {' '}
                     <Button onClick={this.handleSubmit}>Add</Button>
                 </Form>
             </div>

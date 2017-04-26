@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { LinkContainer } from 'react-router-bootstrap';
 import {
   Button,
+  ButtonToolbar,
   Form,
   FormControl,
   FormGroup,
@@ -25,13 +26,14 @@ export default class Actions extends Component {
         this.handleClassRemove = this.handleClassRemove.bind(this);
         this.getClasses = this.getClasses.bind(this);
         this.displayNextImage = this.displayNextImage.bind(this);
+        this.goBackToClassManagement = this.goBackToClassManagement.bind(this);
     }
 
     state = {
-        init : true,
         classList : [],
-        urls : '',
-        currentImage : {}
+        currentImage : {},
+        displayResult: false,
+        displayMsg: null
     }
 
 
@@ -66,11 +68,14 @@ export default class Actions extends Component {
 
     displayNextImage () {
         client({method: 'GET', path: '/api/classifier/nextImage', params: {}}).done(response => {
-            console.log(response.entity)
             this.setState({
-                init: false,
-                currentImage: response.entity
+                currentImage: response.entity,
+                displayResult: response.entity.imageUrl == undefined
             });
+
+            // Mask class and image management panels
+            document.getElementById("imagesManager").style = "display: none"
+            document.getElementById("classManager").style = "display: none"
         });
     }
 
@@ -92,38 +97,80 @@ export default class Actions extends Component {
         this.setState( {classList: this.state.classList} );
     }
 
+    goBackToClassManagement () {
+        document.getElementById("imagesManager").style = "display: block"
+        document.getElementById("classManager").style = "display: block"
+        document.getElementById("imageClassifier").style = "display: none"
+        document.getElementById("resultPanel").style = "display: none"
+
+        this.setState({
+            displayResult: false,
+            displayMsg: null
+        });
+        this.getClasses();
+    }
+
+    exportCsv () {
+        client({method: 'GET', path: '/api/classifier/export', params: {}}).done(response => {
+            this.setState({
+                displayMsg: "Exported to $ROOT_PATH !"
+            });
+        });
+    }
+
     render () {
         return (
             <div>
-                 <div className="col-md-9">
-                    <Panel header="Images management" collapsible expanded={this.state.init}>
-                    <Form onSubmit={this.launchClassification}>
-                        <FormGroup controlId="file">
-                            <ControlLabel>CSV File</ControlLabel>
-                            <FormControl type="file" />
-                        </FormGroup>
-                        <FormGroup controlId="images">
-                            <ControlLabel>Images</ControlLabel>
-                            <FormControl componentClass="textarea" placeholder="Enter image urls here..." />
-                        </FormGroup>
-                        <Button type="submit">Start</Button>
-                    </Form>
-                    </Panel>
-                 </div>
-                 <div className="col-md-9">
-                    <Panel header="Class management" collapsible expanded={this.state.init}>
-                        <div className="col-md-5">
+                <div id="classManager" className="col-md-9">
+                    <Panel header="Class management">
+                        <div className="col-md-9">
                             <NewRow onRowSubmit={this.handleNewRowSubmit}/>
                         </div>
-                        <div className="col-md-5">
+                        <div className="col-md-9">
                             <ClassList clist={this.state.classList} onClassRemove={this.handleClassRemove}/>
                             <Button onClick={this.getClasses}>Reload</Button>
                         </div>
                     </Panel>
                  </div>
-                 <ImageClassifier
-                        clist={this.state.classList}
-                        imageProduct={this.state.currentImage} />
+                 <div id="imagesManager" className="col-md-9">
+                    <Panel  header="Images management">
+                        <Form onSubmit={this.launchClassification}>
+                            <FormGroup controlId="file">
+                                <ControlLabel>CSV File</ControlLabel>
+                                <FormControl type="file" />
+                            </FormGroup>
+                            <FormGroup controlId="images">
+                                <ControlLabel>Images</ControlLabel>
+                                <FormControl componentClass="textarea" placeholder="Enter image urls here..." />
+                            </FormGroup>
+                            <Button bsStyle="danger" type="submit">Start</Button>
+                        </Form>
+                    </Panel>
+                 </div>
+                 {this.state.currentImage.imageUrl &&
+                     <div id="imageClassifier" className="col-md-9">
+                        <ImageClassifier
+                            clist={this.state.classList}
+                            imageProduct={this.state.currentImage}
+                            handleNextImage={this.displayNextImage}
+                            handleBackToClassManagement={this.goBackToClassManagement}/>
+                    </div>
+                 }
+                {this.state.displayResult &&
+                   <div id="resultPanel" className="col-md-9">
+                      <Panel header="Finished !">
+                          {this.state.displayMsg &&
+                             <Alert bsStyle="success">
+                                 {this.state.displayMsg}
+                             </Alert>
+                          }
+                          <ButtonToolbar>
+                              <Button onClick={this.exportCsv} bsStyle="success">Export to CSV</Button>
+                              <Button onClick={this.goBackToClassManagement} bsStyle="primary">Back</Button>
+                          </ButtonToolbar>
+                      </Panel>
+                    </div>
+                 }
              </div>
         )
     }

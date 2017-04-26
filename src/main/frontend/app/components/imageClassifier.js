@@ -1,44 +1,73 @@
 import React, { Component } from 'react';
 import {
   Button,
-  Panel
+  ButtonToolbar,
+  Panel,
+  ProgressBar
 } from 'react-bootstrap';
+import ButtonClass from './buttonClass';
+const client = require('../api/client');
 
 export default class ImageClassifier extends Component {
 
     constructor (props) {
         super(props);
         this.handleClassChoice = this.handleClassChoice.bind(this);
+        this.handleBack = this.handleBack.bind(this);
+        this.recalculateProgress = this.recalculateProgress.bind(this);
     }
 
     state = {
+        currentProgress : 0
     }
 
-    handleClassChoice (source) {
+    recalculateProgress () {
+        client({method: 'GET', path: '/api/classifier/calculateProgress', params: {}}).done(response => {
+            this.setState({
+                currentProgress: response.entity,
+            });
+        });
+    }
 
+    handleClassChoice (classObj) {
+        // Set class into productImage
+        this.props.imageProduct["classObj"] = classObj;
+
+        // Post and save the match
+        client({
+            method: 'POST',
+            path: '/api/classifier/link',
+            entity: this.props.imageProduct,
+            headers: { 'Content-Type': 'application/json' }
+        }).done(response => {
+            // Ask for an other image
+            this.recalculateProgress();
+            this.props.handleNextImage();
+        });
+    }
+
+    handleBack () {
+        this.props.handleBackToClassManagement();
     }
 
     render () {
         var classificationButtonBar = []
-        var that = this; // TODO: Needs to find out why that = this made it work; Was getting error that onClassDelete is not undefined
+        var that = this;
         console.log(this.props.clist)
         this.props.clist.forEach(function(classObj) {
-            classificationButtonBar.push(<Button key={classObj.cname} onClick={that.handleClassChoice()}>{classObj.cname}</Button>);
+            classificationButtonBar.push(<ButtonClass classObj={classObj} onButtonClassClick={that.handleClassChoice} />);
         });
         return (
-            <div className="col-md-9">
-                <Panel header="Image Classification">
-                    <div className="col-md-5">
-                        {this.props.imageProduct.imageUrl &&
-                            <img src={this.props.imageProduct.imageUrl} />
-                        }
-                        {classificationButtonBar}
-                    </div>
-                    <div className="col-md-5">
-                        {classificationButtonBar}
-                    </div>
-                </Panel>
-             </div>
+            <Panel header="Image Classification">
+                <div>
+                    <img className="image-container" src={this.props.imageProduct.imageUrl} />
+                    <ProgressBar now={this.state.currentProgress} />
+                </div>
+                <ButtonToolbar>
+                    {classificationButtonBar}
+                    <Button onClick={this.handleBack} bsStyle="primary">Back</Button>
+                </ButtonToolbar>
+            </Panel>
         )
     }
  }
