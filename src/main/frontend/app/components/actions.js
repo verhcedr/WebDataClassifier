@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router';
 import { LinkContainer } from 'react-router-bootstrap';
 import {
+  Alert,
   Button,
   ButtonToolbar,
   Form,
@@ -27,6 +28,7 @@ export default class Actions extends Component {
         this.getClasses = this.getClasses.bind(this);
         this.displayNextImage = this.displayNextImage.bind(this);
         this.goBackToClassManagement = this.goBackToClassManagement.bind(this);
+        this.exportCsv = this.exportCsv.bind(this);
     }
 
     state = {
@@ -113,7 +115,7 @@ export default class Actions extends Component {
     exportCsv () {
         client({method: 'GET', path: '/api/classifier/export', params: {}}).done(response => {
             this.setState({
-                displayMsg: "Exported to $ROOT_PATH !"
+                displayMsg: "Exported successfully !!"
             });
         });
     }
@@ -160,9 +162,7 @@ export default class Actions extends Component {
                    <div id="resultPanel" className="col-md-9">
                       <Panel header="Finished !">
                           {this.state.displayMsg &&
-                             <Alert bsStyle="success">
-                                 {this.state.displayMsg}
-                             </Alert>
+                             <Alert bsStyle="success">{this.state.displayMsg}</Alert>
                           }
                           <ButtonToolbar>
                               <Button onClick={this.exportCsv} bsStyle="success">Export to CSV</Button>

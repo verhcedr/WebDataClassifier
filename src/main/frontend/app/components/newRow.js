@@ -42,13 +42,13 @@ export default class NewRow extends Component {
         return (
             <div>
                  <Form inline>
-                    <FormGroup controlId="cname">
+                    <FormGroup controlId="cname" required={true}>
                         <ControlLabel>Name</ControlLabel>
                         {' '}
                         <FormControl componentClass="input"  placeholder="Enter name..." />
                     </FormGroup>
                     {' '}
-                    <FormGroup controlId="directory">
+                    <FormGroup controlId="directory" required={true}>
                         <ControlLabel>Directory</ControlLabel>
                         {' '}
                         <FormControl componentClass="input"  placeholder="Enter dir..." />

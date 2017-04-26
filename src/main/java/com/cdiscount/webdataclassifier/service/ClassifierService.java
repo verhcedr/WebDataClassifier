@@ -7,7 +7,6 @@ import com.cdiscount.webdataclassifier.repository.ClassObjRepository;
 import com.cdiscount.webdataclassifier.repository.ProductImageRepository;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.net.URL;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by verhcedr on 17/02/2017.
@@ -23,17 +24,46 @@ import java.util.List;
 @Transactional
 public class ClassifierService {
 
+    private static Pattern CDS_IMAGE_PATTERN = Pattern.compile("http://i..cdscdn.com/pdt2/./././(.)/");
     @Autowired
     private WdcProperties properties;
-
+    private ClassObjRepository classObjRepository;
+    private ProductImageRepository productImageRepository;
     @Autowired
     public ClassifierService(ClassObjRepository classObjRepository, ProductImageRepository productImageRepository) {
         this.classObjRepository = classObjRepository;
         this.productImageRepository = productImageRepository;
     }
 
-    private ClassObjRepository classObjRepository;
-    private ProductImageRepository productImageRepository;
+    public static void downloadImage(String sourceUrl, String targetDirectory) {
+        try {
+            URL imageUrl = new URL(sourceUrl);
+            try (InputStream imageReader = new BufferedInputStream(imageUrl.openStream());
+                 OutputStream imageWriter = new BufferedOutputStream(
+                         new FileOutputStream(buildFullPathToImage(sourceUrl, targetDirectory)))) {
+                int readByte;
+                while ((readByte = imageReader.read()) != -1) {
+                    imageWriter.write(readByte);
+                }
+
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("error during image download", e);
+        }
+    }
+
+    private static String buildFullPathToImage(String sourceUrl, String targetDirectory) {
+        String fileName = FilenameUtils.getBaseName(sourceUrl);
+
+        // Try to suffix filename with image number
+        Matcher matcher = CDS_IMAGE_PATTERN.matcher(sourceUrl);
+        if (matcher.find()) {
+            fileName += "_" + matcher.group(matcher.groupCount());
+        }
+
+        return targetDirectory + File.separator
+                + fileName + "." + FilenameUtils.getExtension(sourceUrl);
+    }
 
     public void store(ProductImage productImage) {
         // If option is enabled and class is specified, try to download image
@@ -59,8 +89,8 @@ public class ClassifierService {
     private String buildImageDestinationDir(String rootPath, ProductImage productImage) {
         StringBuilder directory = new StringBuilder(rootPath);
         String classDirectory = productImage.getClassObj().getDirectory();
-        if(!rootPath.endsWith("/") && !classDirectory.startsWith("/")) {
-            directory.append("/");
+        if (!rootPath.endsWith(File.separator) && !classDirectory.startsWith(File.separator)) {
+            directory.append(File.separator);
         }
         directory.append(classDirectory);
 
@@ -70,24 +100,6 @@ public class ClassifierService {
         pathToDirectoryFile.mkdirs();
 
         return pathToDirectory;
-    }
-
-    public static void downloadImage(String sourceUrl, String targetDirectory) {
-        try {
-            URL imageUrl = new URL(sourceUrl);
-            try (InputStream imageReader = new BufferedInputStream(imageUrl.openStream());
-                 OutputStream imageWriter = new BufferedOutputStream(
-                         new FileOutputStream(targetDirectory + File.separator
-                                 + FilenameUtils.getName(sourceUrl)))) {
-                int readByte;
-                while ((readByte = imageReader.read()) != -1) {
-                    imageWriter.write(readByte);
-                }
-
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("error during image download", e);
-        }
     }
 
     public void deleteAll() {
