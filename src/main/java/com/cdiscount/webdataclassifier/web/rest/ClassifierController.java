@@ -10,7 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,6 +60,7 @@ public class ClassifierController {
                 classObjs.add(ClassObj.builder()
                         .cname(current.getString("cname"))
                         .directory(current.getString("directory"))
+                        .shortcut(current.getString("shortcut"))
                         .build());
             }
         }
@@ -68,6 +72,11 @@ public class ClassifierController {
     @GetMapping("/nextImage")
     public ProductImage getNextImage() {
         return classifierService.getNextProductImage();
+    }
+
+    @GetMapping("/previousImage")
+    public ProductImage getPreviousImage() {
+        return classifierService.getPreviousProductImage();
     }
 
     @GetMapping("/all")
@@ -86,12 +95,18 @@ public class ClassifierController {
     }
 
     @GetMapping("/export")
-    public ResponseEntity exportResult() {
-        try {
-            Utils.writeProductImagesToCsv(properties.getStorage().getRootPath() + "/export.csv", classifierService.findAllProducts(), classifierService.findAllClasses());
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (IOException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<FileSystemResource> exportResult() throws IOException {
+        String pathToExportedCsv = Utils.writeProductImagesToCsv(
+                properties.getStorage().getRootPath() + "/export.csv",
+                classifierService.findAllProducts(),
+                classifierService.findAllClasses()
+        );
+        HttpHeaders header = new HttpHeaders();
+        header.setContentType(MediaType.APPLICATION_PDF);
+        header.set(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=export.csv");
+
+        return new ResponseEntity<>(new FileSystemResource(pathToExportedCsv),
+                header, HttpStatus.OK);
     }
 }

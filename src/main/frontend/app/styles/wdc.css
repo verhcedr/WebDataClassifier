@@ -11,29 +11,7 @@ html, body, [data-reactroot] {
      height: 100%;
  }
 
-.full-height-body {
-    height: calc(100% - 100px);
-}
-
-.top-menu {
-    height: 50px;
-    margin-bottom: 20px;
-}
-
-.left-zone {
-    height: 100%;
-}
-
-.right-zone {
-    height: 100%;
-    border: 1px solid;
-}
-
 .image-container {
-    max-width: 800px;
-    max-height: 600px;
-}
-
-li.info {
-    color: red;
+    width: 600px;
+    height: 600px;
 }

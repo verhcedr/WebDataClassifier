@@ -5,4 +5,4 @@ spring:
 wdc:
   storage:
     downloadImages : true
-    rootPath: /home/cedricverhooste/temp
+    rootPath: /data/wdc

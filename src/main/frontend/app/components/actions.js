@@ -29,11 +29,13 @@ export default class Actions extends Component {
         this.displayNextImage = this.displayNextImage.bind(this);
         this.goBackToClassManagement = this.goBackToClassManagement.bind(this);
         this.exportCsv = this.exportCsv.bind(this);
+        this.handlePreviousImage = this.handlePreviousImage.bind(this);
     }
 
     state = {
         classList : [],
         currentImage : {},
+        previousImage : {},
         displayResult: false,
         displayMsg: null
     }
@@ -81,6 +83,14 @@ export default class Actions extends Component {
         });
     }
 
+    handlePreviousImage () {
+        client({method: 'GET', path: '/api/classifier/previousImage', params: {}}).done(response => {
+            this.setState({
+                currentImage: response.entity
+            });
+        });
+    }
+
     handleNewRowSubmit(newLine) {
         this.setState( {classList: this.state.classList.concat([newLine])} );
     }
@@ -103,38 +113,36 @@ export default class Actions extends Component {
         document.getElementById("imagesManager").style = "display: block"
         document.getElementById("classManager").style = "display: block"
         document.getElementById("imageClassifier").style = "display: none"
-        document.getElementById("resultPanel").style = "display: none"
 
         this.setState({
             displayResult: false,
-            displayMsg: null
+            displayMsg: undefined
         });
         this.getClasses();
     }
 
     exportCsv () {
-        client({method: 'GET', path: '/api/classifier/export', params: {}}).done(response => {
-            this.setState({
-                displayMsg: "Exported successfully !!"
-            });
+        window.open("/api/classifier/export", "", "");
+        this.setState({
+            displayMsg: "Exported successfully !!"
         });
     }
 
     render () {
         return (
             <div>
-                <div id="classManager" className="col-md-9">
+                <div id="classManager" className="col-md-12">
                     <Panel header="Class management">
-                        <div className="col-md-9">
+                        <div className="col-md-12">
                             <NewRow onRowSubmit={this.handleNewRowSubmit}/>
                         </div>
-                        <div className="col-md-9">
+                        <div className="col-md-12">
                             <ClassList clist={this.state.classList} onClassRemove={this.handleClassRemove}/>
                             <Button onClick={this.getClasses}>Reload</Button>
                         </div>
                     </Panel>
                  </div>
-                 <div id="imagesManager" className="col-md-9">
+                 <div id="imagesManager" className="col-md-12">
                     <Panel  header="Images management">
                         <Form onSubmit={this.launchClassification}>
                             <FormGroup controlId="file">
@@ -145,21 +153,23 @@ export default class Actions extends Component {
                                 <ControlLabel>Images</ControlLabel>
                                 <FormControl componentClass="textarea" placeholder="Enter image urls here..." />
                             </FormGroup>
-                            <Button bsStyle="danger" type="submit">Start</Button>
+                            <Button bsStyle="success" type="submit">Start</Button>
                         </Form>
                     </Panel>
                  </div>
                  {this.state.currentImage.imageUrl &&
-                     <div id="imageClassifier" className="col-md-9">
+                     <div id="imageClassifier" className="col-md-12">
                         <ImageClassifier
                             clist={this.state.classList}
                             imageProduct={this.state.currentImage}
                             handleNextImage={this.displayNextImage}
-                            handleBackToClassManagement={this.goBackToClassManagement}/>
+                            handleBackToClassManagement={this.goBackToClassManagement}
+                            handlePreviousImage={this.handlePreviousImage}
+                            handleExport={this.exportCsv}/>
                     </div>
                  }
                 {this.state.displayResult &&
-                   <div id="resultPanel" className="col-md-9">
+                   <div className="col-md-12">
                       <Panel header="Finished !">
                           {this.state.displayMsg &&
                              <Alert bsStyle="success">{this.state.displayMsg}</Alert>

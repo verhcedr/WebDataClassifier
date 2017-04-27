@@ -17,6 +17,7 @@ export default class ClassObj extends Component {
             <tr>
               <td>{this.props.classObj.cname}</td>
               <td>{this.props.classObj.directory}</td>
+              <td>{this.props.classObj.shortcut}</td>
               <td><input type="button"  className="btn btn-primary" value="Remove" onClick={this.handleRemoveClass}/></td>
             </tr>
         )

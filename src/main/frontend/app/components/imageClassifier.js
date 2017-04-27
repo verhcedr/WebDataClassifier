@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import {
   Button,
   ButtonToolbar,
+  ButtonGroup,
   Panel,
-  ProgressBar
+  ProgressBar,
+  Well
 } from 'react-bootstrap';
 import ButtonClass from './buttonClass';
 const client = require('../api/client');
@@ -15,6 +17,10 @@ export default class ImageClassifier extends Component {
         this.handleClassChoice = this.handleClassChoice.bind(this);
         this.handleBack = this.handleBack.bind(this);
         this.recalculateProgress = this.recalculateProgress.bind(this);
+        this.handlePrevious = this.handlePrevious.bind(this);
+        this.getImageUrl = this.getImageUrl.bind(this);
+        this.refreshImage = this.refreshImage.bind(this);
+        this.handleStopAndExport = this.handleStopAndExport.bind(this);
     }
 
     state = {
@@ -50,22 +56,51 @@ export default class ImageClassifier extends Component {
         this.props.handleBackToClassManagement();
     }
 
+    handlePrevious () {
+        this.props.handlePreviousImage();
+        this.recalculateProgress();
+    }
+
+    getImageUrl () {
+        return this.props.imageProduct.imageUrl + "?t=" + new Date().getTime();
+    }
+
+    refreshImage () {
+        document.getElementById("image").src = this.getImageUrl();
+    }
+
+    handleStopAndExport () {
+        this.props.handleExport();
+        this.props.handleBackToClassManagement();
+    }
+
+    isCurrentClass(classObj) {
+        return this.props.imageProduct.classObj && this.props.imageProduct.classObj.cname === classObj.cname;
+    }
+
     render () {
-        var classificationButtonBar = []
+        var classificationButtonBar = [];
         var that = this;
-        console.log(this.props.clist)
         this.props.clist.forEach(function(classObj) {
-            classificationButtonBar.push(<ButtonClass classObj={classObj} onButtonClassClick={that.handleClassChoice} />);
+            classificationButtonBar.push(<ButtonClass isActive={that.isCurrentClass(classObj)} classObj={classObj} onButtonClassClick={that.handleClassChoice} />);
         });
         return (
             <Panel header="Image Classification">
                 <div>
-                    <img className="image-container" src={this.props.imageProduct.imageUrl} />
-                    <ProgressBar now={this.state.currentProgress} />
+                    {this.props.imageProduct.classObj &&
+                        <Well bsSize="small">Actual class : <b>{this.props.imageProduct.classObj.cname}</b></Well>
+                    }
+                    <img id="image" className="image-container" src={this.getImageUrl()} />
+                    <ProgressBar active now={this.state.currentProgress} />
                 </div>
                 <ButtonToolbar>
-                    {classificationButtonBar}
-                    <Button onClick={this.handleBack} bsStyle="primary">Back</Button>
+                    <Button onClick={this.handlePrevious} bsStyle="primary">Previous</Button>
+                    <ButtonGroup>
+                        {classificationButtonBar}
+                    </ButtonGroup>
+                    <Button onClick={this.refreshImage} bsStyle="info">Refresh</Button>
+                    <Button onClick={this.handleStopAndExport} bsStyle="warning">Stop and Export</Button>
+                    <Button onClick={this.handleBack} bsStyle="danger">Cancel</Button>
                 </ButtonToolbar>
             </Panel>
         )

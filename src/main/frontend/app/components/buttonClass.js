@@ -14,7 +14,7 @@ export default class ButtonClass extends Component {
 
     render () {
         return (
-            <Button key={this.props.classObj.cname} onClick={this.handleClassChoice}>{this.props.classObj.cname}</Button>
+            <Button active={this.props.isActive} key={this.props.classObj.cname} onClick={this.handleClassChoice}>{this.props.classObj.cname} ({this.props.classObj.shortcut})</Button>
         )
     }
  }

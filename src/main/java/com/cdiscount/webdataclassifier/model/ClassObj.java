@@ -22,7 +22,6 @@ public class ClassObj implements Serializable {
     @Id
     private String cname;
     private String directory;
-
-//    private Set<ProductImage> productImages;
+    private String shortcut;
 
 }

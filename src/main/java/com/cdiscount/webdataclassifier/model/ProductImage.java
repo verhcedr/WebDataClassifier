@@ -7,8 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.io.Serializable;
 
@@ -22,16 +20,11 @@ import java.io.Serializable;
 @Builder
 public class ProductImage implements Serializable {
 
-    @CsvBindByName
-    private String sku;
-
-    @CsvBindByName
-    private String productName;
-
     @Id
     @CsvBindByName
     private String imageUrl;
-
+    private String sku;
+    private String productName;
     private String imageName;
     private boolean imageDownloaded;
     private ClassObj classObj;

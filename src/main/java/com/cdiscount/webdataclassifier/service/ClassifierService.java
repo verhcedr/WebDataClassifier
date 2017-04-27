@@ -114,4 +114,8 @@ public class ClassifierService {
     public List<ProductImage> findAllProducts() {
         return Lists.newArrayList(productImageRepository.findAll());
     }
+
+    public ProductImage getPreviousProductImage() {
+        return productImageRepository.getPreviousProductImage();
+    }
 }

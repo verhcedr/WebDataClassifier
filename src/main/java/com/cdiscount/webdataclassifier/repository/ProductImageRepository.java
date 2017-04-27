@@ -2,11 +2,7 @@ package com.cdiscount.webdataclassifier.repository;
 
 import com.cdiscount.webdataclassifier.model.ProductImage;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Map;
 
 /**
  * Created by cedricverhooste on 25/04/17.
@@ -39,5 +35,14 @@ public class ProductImageRepository extends InMemoryCrudRepository<ProductImage,
     public Integer calculateProgress() {
         float result = (index) * 100 / count();
         return Math.round(result);
+    }
+
+    public ProductImage getPreviousProductImage() {
+        // Decrease the index number
+        index -= 2;
+        if (index < 0) {
+            index = 0;
+        }
+        return getNextProductImage();
     }
 }

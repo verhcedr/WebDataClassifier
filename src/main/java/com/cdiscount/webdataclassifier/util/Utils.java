@@ -2,17 +2,12 @@ package com.cdiscount.webdataclassifier.util;
 
 import com.cdiscount.webdataclassifier.model.ClassObj;
 import com.cdiscount.webdataclassifier.model.ProductImage;
-import com.cdiscount.webdataclassifier.model.ProductImageCsvBean;
 import com.cdiscount.webdataclassifier.service.ClassifierService;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileWriter;
@@ -38,7 +33,7 @@ public abstract class Utils {
         }
     }
 
-    public static void writeProductImagesToCsv(String target, List<ProductImage> productImages, List<ClassObj> classes) throws IOException {
+    public static String writeProductImagesToCsv(String target, List<ProductImage> productImages, List<ClassObj> classes) throws IOException {
         final FileWriter sw = new FileWriter(target);
         // Define headers
         List<String> columnNames = classes.stream().map(classObj -> classObj.getCname().trim()).collect(Collectors.toList());
@@ -47,16 +42,21 @@ public abstract class Utils {
         CSVPrinter csvPrinter = CSVFormat.DEFAULT.withHeader(columnNames.toArray(new String[columnNames.size()])).print(sw);
 
         for (ProductImage productImage : productImages) {
-            // Write image url
-            csvPrinter.print(productImage.getImageUrl());
-            // Write class
-            for (ClassObj classObj : classes) {
-                csvPrinter.print(classObj.getCname().equals(productImage.getClassObj().getCname()) ? 1 : 0);
+            // Write only classified images
+            if (productImage.getClassObj() != null) {
+                // Write image url
+                csvPrinter.print(productImage.getImageUrl());
+                // Write class
+                for (ClassObj classObj : classes) {
+                    csvPrinter.print(classObj.getCname().equals(productImage.getClassObj().getCname()) ? 1 : 0);
+                }
+                csvPrinter.println();
             }
-            csvPrinter.println();
         }
         csvPrinter.flush();
         csvPrinter.close();
+
+        return target;
     }
 
 

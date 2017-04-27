@@ -23,7 +23,7 @@ export default class ClassList extends Component {
         return (
             <div>
               <table className="table table-striped">
-                <thead><tr><th>Class Name</th><th>Directory</th><th>Action</th></tr></thead>
+                <thead><tr><th>Class Name</th><th>Directory</th><th>Shortcut</th><th>Action</th></tr></thead>
                 <tbody>{classList}</tbody>
               </table>
             </div>
