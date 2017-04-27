@@ -17,8 +17,21 @@ export default class NewRow extends Component {
             directory: '',
             shortcut: ''
         }
+        this.handleCnameChange = this.handleCnameChange.bind(this);
+        this.handleDirectoryChange = this.handleDirectoryChange.bind(this);
+        this.handleShortcutChange = this.handleShortcutChange.bind(this);
         this.handleRemoveClass = this.handleRemoveClass.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    handleCnameChange(event) {
+        this.setState({cname: event.target.value});
+    }
+    handleDirectoryChange(event) {
+        this.setState({directory: event.target.value});
+    }
+    handleShortcutChange(event) {
+        this.setState({shortcut: event.target.value});
     }
 
     handleRemoveClass () {
@@ -28,18 +41,15 @@ export default class NewRow extends Component {
 
 
     handleSubmit () {
-        var cname = document.getElementById('cname').value;
-        var directory = document.getElementById('directory').value;
-        var shortcut = document.getElementById('shortcut').value;
-        var newrow = {cname: cname, directory: directory, shortcut: shortcut};
-        this.props.onRowSubmit( newrow );
+        this.props.onRowSubmit( this.state );
 
-        document.getElementById('cname').value = '';
-        document.getElementById('directory').value = '';
-        document.getElementById('shortcut').value = '';
+        this.setState({
+            cname: '',
+            directory: '',
+            shortcut: ''
+        });
         return false;
     }
-
 
     render () {
         return (
@@ -48,19 +58,31 @@ export default class NewRow extends Component {
                     <FormGroup controlId="cname" required={true}>
                         <ControlLabel>Name</ControlLabel>
                         {' '}
-                        <FormControl componentClass="input"  placeholder="Enter name..." />
+                        <FormControl
+                            componentClass="input"
+                            placeholder="Enter name..."
+                            value={this.state.cname}
+                            onChange={this.handleCnameChange}/>
                     </FormGroup>
                     {' '}
                     <FormGroup controlId="directory" required={true}>
                         <ControlLabel>Directory</ControlLabel>
                         {' '}
-                        <FormControl componentClass="input"  placeholder="Enter dir..." />
+                        <FormControl
+                            componentClass="input"
+                            placeholder="Enter dir..."
+                            value={this.state.directory}
+                            onChange={this.handleDirectoryChange}/>
                     </FormGroup>
                     {' '}
                     <FormGroup controlId="shortcut" required={true}>
                         <ControlLabel>Shortcut</ControlLabel>
                         {' '}
-                        <FormControl componentClass="input"  placeholder="Enter a letter..." />
+                        <FormControl
+                            componentClass="input"
+                            placeholder="Enter a letter..."
+                            value={this.state.shortcut}
+                            onChange={this.handleShortcutChange}/>
                     </FormGroup>
                     {' '}
                     <Button onClick={this.handleSubmit}>Add</Button>

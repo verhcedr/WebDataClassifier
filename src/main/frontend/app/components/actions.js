@@ -9,7 +9,8 @@ import {
   FormControl,
   FormGroup,
   ControlLabel,
-  Panel
+  Panel,
+  Checkbox
 } from 'react-bootstrap';
 import Home from './home';
 import ClassList from './classList';
@@ -57,6 +58,7 @@ export default class Actions extends Component {
         object["images"] = document.getElementById("images").value;
         object["file"] = document.getElementById("file").files[0];
         object["classes"] = JSON.stringify(this.state.classList);
+        object["validationMode"] =  document.getElementById("validationMode").value;
 
         client({
             method: 'POST',
@@ -153,6 +155,7 @@ export default class Actions extends Component {
                                 <ControlLabel>Images</ControlLabel>
                                 <FormControl componentClass="textarea" placeholder="Enter image urls here..." />
                             </FormGroup>
+                            <Checkbox id="validationMode">Validation mode</Checkbox>
                             <Button bsStyle="success" type="submit">Start</Button>
                         </Form>
                     </Panel>

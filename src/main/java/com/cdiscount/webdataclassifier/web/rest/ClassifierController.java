@@ -4,6 +4,7 @@ import com.cdiscount.webdataclassifier.config.WdcProperties;
 import com.cdiscount.webdataclassifier.model.ClassObj;
 import com.cdiscount.webdataclassifier.model.ProductImage;
 import com.cdiscount.webdataclassifier.service.ClassifierService;
+import com.cdiscount.webdataclassifier.util.AppContext;
 import com.cdiscount.webdataclassifier.util.Utils;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +38,12 @@ public class ClassifierController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity storeData(@RequestParam(name="images", required=false) String imageUrls, @RequestParam(name="file", required=false) MultipartFile file, @RequestParam("classes") String classes) {
+    public ResponseEntity storeData(
+            @RequestParam(name = "images", required = false) String imageUrls,
+            @RequestParam(name = "file", required = false) MultipartFile file,
+            @RequestParam("classes") String classes,
+            @RequestParam(name = "validationMode", required = false) Boolean validationMode) {
+
         // Reset images
         classifierService.deleteAll();
 
@@ -65,6 +71,10 @@ public class ClassifierController {
             }
         }
         classifierService.store(classObjs);
+
+        // Init AppContext
+        AppContext.INSTANCE.setProductImageCount(classifierService.findAllProducts().size());
+        AppContext.INSTANCE.setValidationMode(validationMode);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -5,6 +5,7 @@ import com.cdiscount.webdataclassifier.model.ClassObj;
 import com.cdiscount.webdataclassifier.model.ProductImage;
 import com.cdiscount.webdataclassifier.repository.ClassObjRepository;
 import com.cdiscount.webdataclassifier.repository.ProductImageRepository;
+import com.cdiscount.webdataclassifier.util.AppContext;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,6 @@ public class ClassifierService {
                 while ((readByte = imageReader.read()) != -1) {
                     imageWriter.write(readByte);
                 }
-
             }
         } catch (IOException e) {
             throw new RuntimeException("error during image download", e);
@@ -66,10 +66,20 @@ public class ClassifierService {
     }
 
     public void store(ProductImage productImage) {
-        // If option is enabled and class is specified, try to download image
-        if (properties.getStorage().getDownloadImages() && !productImage.isImageDownloaded() && productImage.getClassObj() != null) {
-            downloadImage(productImage.getImageUrl(), buildImageDestinationDir(properties.getStorage().getRootPath(), productImage));
-            productImage.setImageDownloaded(true);
+        if (productImage.getClassObj() != null) {
+            if (AppContext.INSTANCE.isValidationMode()) {
+                // Check previous image class
+                ProductImage previousProduct = productImageRepository.findOne(productImage.getImageUrl());
+                if (previousProduct.getClassObj() != null && !previousProduct.getClassObj().equals(productImage.getClassObj())) {
+                    AppContext.INSTANCE.setErrorCount(AppContext.INSTANCE.getErrorCount() + 1);
+                }
+            }
+
+            // If option is enabled and class is specified, try to download image
+            if (properties.getStorage().getDownloadImages() && !productImage.isImageDownloaded() && productImage.getClassObj() != null) {
+                downloadImage(productImage.getImageUrl(), buildImageDestinationDir(properties.getStorage().getRootPath(), productImage));
+                productImage.setImageDownloaded(true);
+            }
         }
         productImageRepository.save(productImage);
     }

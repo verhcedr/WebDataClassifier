@@ -1,6 +1,7 @@
 package com.cdiscount.webdataclassifier.repository;
 
 import com.cdiscount.webdataclassifier.model.ProductImage;
+import com.cdiscount.webdataclassifier.util.AppContext;
 import com.google.common.collect.Lists;
 import org.springframework.stereotype.Repository;
 
@@ -10,12 +11,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ProductImageRepository extends InMemoryCrudRepository<ProductImage, String> {
 
-    private int index = 0;
-
     @Override
     public void deleteAll() {
         super.deleteAll();
-        index = 0;
+        AppContext.INSTANCE.clear();
     }
 
     @Override
@@ -25,23 +24,23 @@ public class ProductImageRepository extends InMemoryCrudRepository<ProductImage,
 
     public ProductImage getNextProductImage() {
         ProductImage productImage = null;
-        if(index < count()) {
-            productImage = Lists.newArrayList(findAll()).get(index);
-            index++;
+        if (AppContext.INSTANCE.getIndex() < count()) {
+            productImage = Lists.newArrayList(findAll()).get(AppContext.INSTANCE.getIndex());
+            AppContext.INSTANCE.setIndex(AppContext.INSTANCE.getIndex() + 1);
         }
         return productImage;
     }
 
     public Integer calculateProgress() {
-        float result = (index) * 100 / count();
+        float result = (AppContext.INSTANCE.getIndex()) * 100 / count();
         return Math.round(result);
     }
 
     public ProductImage getPreviousProductImage() {
         // Decrease the index number
-        index -= 2;
-        if (index < 0) {
-            index = 0;
+        AppContext.INSTANCE.setIndex(AppContext.INSTANCE.getIndex() - 2);
+        if (AppContext.INSTANCE.getIndex() < 0) {
+            AppContext.INSTANCE.setIndex(0);
         }
         return getNextProductImage();
     }
