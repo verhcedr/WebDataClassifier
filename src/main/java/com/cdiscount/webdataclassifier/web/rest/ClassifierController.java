@@ -19,9 +19,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/classifier")
@@ -113,15 +118,19 @@ public class ClassifierController {
 
     @GetMapping("/export")
     public ResponseEntity<FileSystemResource> exportResult() throws IOException {
+        String exportName = "export_" + DateTimeFormatter
+                .ofPattern("dd-MM-yyyy_HH-mm", Locale.FRANCE)
+                .withZone(ZoneId.systemDefault())
+                .format(Instant.now()) + ".csv";
         String pathToExportedCsv = Utils.writeProductImagesToCsv(
-                properties.getStorage().getRootPath() + "/export.csv",
+                properties.getStorage().getRootPath() + File.separator + exportName,
                 classifierService.findAllProducts(),
                 classifierService.findAllClasses()
         );
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.APPLICATION_PDF);
         header.set(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=export.csv");
+                "attachment; filename=" + exportName);
 
         return new ResponseEntity<>(new FileSystemResource(pathToExportedCsv),
                 header, HttpStatus.OK);

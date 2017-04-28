@@ -127,7 +127,7 @@ export default class Actions extends Component {
 
         this.setState({
             displayResult: false,
-            displayMsg: undefined
+            displayMsg: ''
         });
         this.getClasses();
     }
