@@ -5,11 +5,11 @@ import {
   ButtonGroup,
   Panel,
   ProgressBar,
-  Well,
-  StyleSheet
+  Well
 } from 'react-bootstrap';
 import ButtonClass from './buttonClass';
 const client = require('../api/client');
+import {HotKeys} from 'react-hotkeys';
 
 export default class ImageClassifier extends Component {
 
@@ -25,7 +25,8 @@ export default class ImageClassifier extends Component {
     }
 
     state = {
-        currentProgress : 0
+        currentProgress : 0,
+        keyMap : { 'refreshImg': ['r']}
     }
 
     recalculateProgress () {
@@ -85,26 +86,32 @@ export default class ImageClassifier extends Component {
         this.props.clist.forEach(function(classObj) {
             classificationButtonBar.push(<ButtonClass isActive={that.isCurrentClass(classObj)} classObj={classObj} onButtonClassClick={that.handleClassChoice} />);
         });
+
+        const handlers = {
+            'refreshImg': this.refreshImage
+        };
         return (
-            <Panel header="Image Classification">
-                <div>
-                    <Well bsSize="small">Actual class : <b>{this.props.imageProduct.classObj ? this.props.imageProduct.classObj.cname : 'undefined'}</b></Well>
-                    <img id="image" className="image-container" src={this.getImageUrl()} />
-                    <ProgressBar active now={this.state.currentProgress} />
-                </div>
-                <ButtonToolbar>
-                    <ButtonGroup justified>
-                        {classificationButtonBar}
-                    </ButtonGroup>
-                </ButtonToolbar>
-                <br />
-                <ButtonToolbar>
-                    <Button onClick={this.handlePrevious} bsStyle="primary">Previous</Button>
-                    <Button onClick={this.refreshImage} bsStyle="info">Refresh</Button>
-                    <Button onClick={this.handleStopAndExport} bsStyle="warning">Stop and Export</Button>
-                    <Button onClick={this.handleBack} bsStyle="danger">Cancel</Button>
-                </ButtonToolbar>
-            </Panel>
+            <HotKeys keyMap={this.state.keyMap} handlers={handlers} >
+                <Panel header="Image Classification">
+                    <div>
+                        <Well bsSize="small">Actual class : <b>{this.props.imageProduct.classObj ? this.props.imageProduct.classObj.cname : 'undefined'}</b></Well>
+                        <img id="image" className="image-container" src={this.getImageUrl()} />
+                        <ProgressBar active now={this.state.currentProgress} />
+                    </div>
+                    <ButtonToolbar>
+                        <ButtonGroup justified>
+                            {classificationButtonBar}
+                        </ButtonGroup>
+                    </ButtonToolbar>
+                    <br />
+                    <ButtonToolbar>
+                        <Button onClick={this.handlePrevious} bsStyle="primary">Previous</Button>
+                        <Button onClick={this.refreshImage} bsStyle="info">Refresh (R)</Button>
+                        <Button onClick={this.handleStopAndExport} bsStyle="warning">Stop and Export</Button>
+                        <Button onClick={this.handleBack} bsStyle="danger">Cancel</Button>
+                    </ButtonToolbar>
+                </Panel>
+            </HotKeys>
         )
     }
  }

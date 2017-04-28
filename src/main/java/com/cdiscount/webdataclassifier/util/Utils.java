@@ -20,16 +20,6 @@ import java.util.stream.Collectors;
 public abstract class Utils {
 
     public static void parseFileAndSaveProductImages(List<ClassObj> classes, MultipartFile file, ClassifierService classifierService) {
-//        HeaderColumnNameMappingStrategy<ProductImage> strategy = new HeaderColumnNameMappingStrategy<>();
-//        strategy.setType(ProductImage.class);
-//        CsvToBean<ProductImage> csvToBean = new CsvToBean<>();
-//
-//        try (InputStreamReader reader = new InputStreamReader(file.getInputStream())) {
-//            csvToBean.parse(strategy, new CSVReader(reader, ',')).forEach(classifierService::store);
-//        } catch (IOException e) {
-//            throw new RuntimeException("error in file parsing", e);
-//        }
-
         try (InputStreamReader reader = new InputStreamReader(file.getInputStream())) {
             CSVReader csvreader = new CSVReader(reader);
             // if the first line is the header

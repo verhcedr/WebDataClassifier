@@ -140,6 +140,9 @@ export default class Actions extends Component {
     }
 
     render () {
+        const map = {
+          'refreshImg': 'r'
+        };
         return (
             <div>
                 <div id="classManager" className="col-md-12">
