@@ -4,8 +4,6 @@ import com.cdiscount.webdataclassifier.model.ClassObj;
 import com.cdiscount.webdataclassifier.model.ProductImage;
 import com.cdiscount.webdataclassifier.service.ClassifierService;
 import com.opencsv.CSVReader;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,16 +19,48 @@ import java.util.stream.Collectors;
  */
 public abstract class Utils {
 
-    public static void parseFileAndSaveProductImages(MultipartFile file, ClassifierService classifierService) {
-        HeaderColumnNameMappingStrategy<ProductImage> strategy = new HeaderColumnNameMappingStrategy<>();
-        strategy.setType(ProductImage.class);
-        CsvToBean<ProductImage> csvToBean = new CsvToBean<>();
+    public static void parseFileAndSaveProductImages(List<ClassObj> classes, MultipartFile file, ClassifierService classifierService) {
+//        HeaderColumnNameMappingStrategy<ProductImage> strategy = new HeaderColumnNameMappingStrategy<>();
+//        strategy.setType(ProductImage.class);
+//        CsvToBean<ProductImage> csvToBean = new CsvToBean<>();
+//
+//        try (InputStreamReader reader = new InputStreamReader(file.getInputStream())) {
+//            csvToBean.parse(strategy, new CSVReader(reader, ',')).forEach(classifierService::store);
+//        } catch (IOException e) {
+//            throw new RuntimeException("error in file parsing", e);
+//        }
 
         try (InputStreamReader reader = new InputStreamReader(file.getInputStream())) {
-            csvToBean.parse(strategy, new CSVReader(reader, ',')).forEach(classifierService::store);
+            CSVReader csvreader = new CSVReader(reader);
+            // if the first line is the header
+            String[] headers = csvreader.readNext();
+            // read line by line
+            String[] record;
+            while ((record = csvreader.readNext()) != null) {
+                classifierService.store(ProductImage.builder()
+                        .imageUrl(record[0])
+                        .classObj(getClassObjFromCname(classes, headers, record))
+                        .build());
+            }
         } catch (IOException e) {
             throw new RuntimeException("error in file parsing", e);
         }
+    }
+
+    private static ClassObj getClassObjFromCname(List<ClassObj> classes, String[] headers, String[] record) {
+        ClassObj result = null;
+
+        for (int index = 1; index < headers.length; index++) {
+            if ("1".equals(record[index])) {
+                for (ClassObj classObj : classes) {
+                    if (headers[index].equals(classObj.getCname())) {
+                        result = classObj;
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     public static String writeProductImagesToCsv(String target, List<ProductImage> productImages, List<ClassObj> classes) throws IOException {
@@ -38,6 +68,9 @@ public abstract class Utils {
         // Define headers
         List<String> columnNames = classes.stream().map(classObj -> classObj.getCname().trim()).collect(Collectors.toList());
         columnNames.add(0, "url");
+        if (AppContext.INSTANCE.isValidationMode()) {
+            columnNames.add("isValid");
+        }
         // Instanciate csv printer with header
         CSVPrinter csvPrinter = CSVFormat.DEFAULT.withHeader(columnNames.toArray(new String[columnNames.size()])).print(sw);
 
@@ -49,6 +82,10 @@ public abstract class Utils {
                 // Write class
                 for (ClassObj classObj : classes) {
                     csvPrinter.print(classObj.getCname().equals(productImage.getClassObj().getCname()) ? 1 : 0);
+                }
+
+                if (AppContext.INSTANCE.isValidationMode()) {
+                    csvPrinter.print(productImage.isValid() ? 1 : 0);
                 }
                 csvPrinter.println();
             }
@@ -67,7 +104,7 @@ public abstract class Utils {
         if (file.isEmpty()) {
             throw new RuntimeException("file upload is empty");
         }
-        if (!file.getName().endsWith(".csv")) {
+        if (!file.getOriginalFilename().endsWith(".csv")) {
             throw new RuntimeException("file must be a CSV");
         }
         return true;

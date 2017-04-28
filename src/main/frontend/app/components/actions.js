@@ -38,7 +38,8 @@ export default class Actions extends Component {
         currentImage : {},
         previousImage : {},
         displayResult: false,
-        displayMsg: null
+        displayMsg: undefined,
+        precision: undefined
     }
 
 
@@ -58,7 +59,7 @@ export default class Actions extends Component {
         object["images"] = document.getElementById("images").value;
         object["file"] = document.getElementById("file").files[0];
         object["classes"] = JSON.stringify(this.state.classList);
-        object["validationMode"] =  document.getElementById("validationMode").value;
+        object["validationMode"] =  document.getElementById("validationMode").checked;
 
         client({
             method: 'POST',
@@ -78,6 +79,14 @@ export default class Actions extends Component {
                 currentImage: response.entity,
                 displayResult: response.entity.imageUrl == undefined
             });
+
+            if(response.entity.imageUrl == undefined && document.getElementById("validationMode").checked) {
+                client({method: 'GET', path: '/api/classifier/calculatePrecision', params: {}}).done(resp => {
+                    this.setState({
+                        precision: resp.entity
+                    });
+                });
+            }
 
             // Mask class and image management panels
             document.getElementById("imagesManager").style = "display: none"
@@ -146,6 +155,9 @@ export default class Actions extends Component {
                  </div>
                  <div id="imagesManager" className="col-md-12">
                     <Panel  header="Images management">
+                        <Alert bsStyle="warning">
+                            <strong>Warning !</strong> CSV format must be : imageUrl,classA,classB
+                        </Alert>
                         <Form onSubmit={this.launchClassification}>
                             <FormGroup controlId="file">
                                 <ControlLabel>CSV File</ControlLabel>
@@ -176,6 +188,9 @@ export default class Actions extends Component {
                       <Panel header="Finished !">
                           {this.state.displayMsg &&
                              <Alert bsStyle="success">{this.state.displayMsg}</Alert>
+                          }
+                          {this.state.precision &&
+                             <Alert bsStyle="success">Precision : <b>{this.state.precision} %</b></Alert>
                           }
                           <ButtonToolbar>
                               <Button onClick={this.exportCsv} bsStyle="success">Export to CSV</Button>

@@ -87,9 +87,7 @@ export default class ImageClassifier extends Component {
         return (
             <Panel header="Image Classification">
                 <div>
-                    {this.props.imageProduct.classObj &&
-                        <Well bsSize="small">Actual class : <b>{this.props.imageProduct.classObj.cname}</b></Well>
-                    }
+                    <Well bsSize="small">Actual class : <b>{this.props.imageProduct.classObj ? this.props.imageProduct.classObj.cname : 'undefined'}</b></Well>
                     <img id="image" className="image-container" src={this.getImageUrl()} />
                     <ProgressBar active now={this.state.currentProgress} />
                 </div>

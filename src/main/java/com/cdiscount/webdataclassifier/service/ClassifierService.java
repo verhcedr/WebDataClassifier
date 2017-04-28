@@ -69,14 +69,15 @@ public class ClassifierService {
         if (productImage.getClassObj() != null) {
             if (AppContext.INSTANCE.isValidationMode()) {
                 // Check previous image class
-                ProductImage previousProduct = productImageRepository.findOne(productImage.getImageUrl());
-                if (previousProduct.getClassObj() != null && !previousProduct.getClassObj().equals(productImage.getClassObj())) {
+                ProductImage storedProduct = productImageRepository.findOne(productImage.getImageUrl());
+                if (storedProduct.getClassObj() != null && !storedProduct.getClassObj().equals(productImage.getClassObj())) {
                     AppContext.INSTANCE.setErrorCount(AppContext.INSTANCE.getErrorCount() + 1);
+                    productImage.setValid(false);
+                } else {
+                    productImage.setValid(true);
                 }
-            }
-
             // If option is enabled and class is specified, try to download image
-            if (properties.getStorage().getDownloadImages() && !productImage.isImageDownloaded() && productImage.getClassObj() != null) {
+            } else if (properties.getStorage().getDownloadImages() && !productImage.isImageDownloaded() && productImage.getClassObj() != null) {
                 downloadImage(productImage.getImageUrl(), buildImageDestinationDir(properties.getStorage().getRootPath(), productImage));
                 productImage.setImageDownloaded(true);
             }

@@ -44,19 +44,31 @@ public class ClassifierController {
             @RequestParam("classes") String classes,
             @RequestParam(name = "validationMode", required = false) Boolean validationMode) {
 
-        // Reset images
+        // Reset in memory classes and images products
         classifierService.deleteAll();
+
+        // Manage classes
+        List<ClassObj> classObjs = parseAndStoreClasses(classes);
 
         // Check and Parse CSV file
         if (Utils.checkFile(file))
-            Utils.parseFileAndSaveProductImages(file, classifierService);
+            Utils.parseFileAndSaveProductImages(classObjs, file, classifierService);
 
-        // Manage urls from textarea
-        if(StringUtils.isNoneEmpty(imageUrls) && imageUrls.contains("http"))
+        // Manage urls from textarea if not in validation mode
+        if (!validationMode && StringUtils.isNoneEmpty(imageUrls) && imageUrls.contains("http"))
             Arrays.stream(imageUrls.split("\r\n"))
-                .map(url -> ProductImage.builder().imageUrl(url).build())
-                .forEach(classifierService::store);
+                    .map(url -> ProductImage.builder().imageUrl(url).build())
+                    .forEach(classifierService::store);
 
+
+        // Init AppContext
+        AppContext.INSTANCE.setProductImageCount(classifierService.findAllProducts().size());
+        AppContext.INSTANCE.setValidationMode(validationMode);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private List<ClassObj> parseAndStoreClasses(@RequestParam("classes") String classes) {
         // Manage classes
         List<ClassObj> classObjs = Lists.newArrayList();
         JSONArray classesArray = new JSONArray(classes);
@@ -71,12 +83,7 @@ public class ClassifierController {
             }
         }
         classifierService.store(classObjs);
-
-        // Init AppContext
-        AppContext.INSTANCE.setProductImageCount(classifierService.findAllProducts().size());
-        AppContext.INSTANCE.setValidationMode(validationMode);
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        return classObjs;
     }
 
     @GetMapping("/nextImage")
@@ -118,5 +125,14 @@ public class ClassifierController {
 
         return new ResponseEntity<>(new FileSystemResource(pathToExportedCsv),
                 header, HttpStatus.OK);
+    }
+
+    @GetMapping("/calculatePrecision")
+    public Integer calculatePrecision() {
+        double error = AppContext.INSTANCE.getErrorCount();
+        double total = AppContext.INSTANCE.getProductImageCount();
+        double precision = 1 - (error / total);
+
+        return Math.toIntExact(Math.round(precision * 100));
     }
 }
