@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, ButtonGroup } from 'react-bootstrap';
 export default class ButtonClass extends Component {
 
     constructor (props) {
@@ -14,7 +14,11 @@ export default class ButtonClass extends Component {
 
     render () {
         return (
-            <Button active={this.props.isActive} key={this.props.classObj.cname} onClick={this.handleClassChoice}>{this.props.classObj.cname} ({this.props.classObj.shortcut})</Button>
+            <ButtonGroup>
+                <Button  active={this.props.isActive}
+                    key={this.props.classObj.cname}
+                    onClick={this.handleClassChoice}>{this.props.classObj.cname} ({this.props.classObj.shortcut})</Button>
+            </ButtonGroup>
         )
     }
  }

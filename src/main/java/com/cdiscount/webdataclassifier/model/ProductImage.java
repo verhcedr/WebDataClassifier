@@ -29,4 +29,6 @@ public class ProductImage implements Serializable {
     private boolean imageDownloaded;
     private ClassObj classObj;
     private boolean isValid;
+
+    private String realPath;
 }

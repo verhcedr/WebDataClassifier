@@ -5,7 +5,8 @@ import {
   ButtonGroup,
   Panel,
   ProgressBar,
-  Well
+  Well,
+  StyleSheet
 } from 'react-bootstrap';
 import ButtonClass from './buttonClass';
 const client = require('../api/client');
@@ -92,10 +93,13 @@ export default class ImageClassifier extends Component {
                     <ProgressBar active now={this.state.currentProgress} />
                 </div>
                 <ButtonToolbar>
-                    <Button onClick={this.handlePrevious} bsStyle="primary">Previous</Button>
-                    <ButtonGroup>
+                    <ButtonGroup justified>
                         {classificationButtonBar}
                     </ButtonGroup>
+                </ButtonToolbar>
+                <br />
+                <ButtonToolbar>
+                    <Button onClick={this.handlePrevious} bsStyle="primary">Previous</Button>
                     <Button onClick={this.refreshImage} bsStyle="info">Refresh</Button>
                     <Button onClick={this.handleStopAndExport} bsStyle="warning">Stop and Export</Button>
                     <Button onClick={this.handleBack} bsStyle="danger">Cancel</Button>

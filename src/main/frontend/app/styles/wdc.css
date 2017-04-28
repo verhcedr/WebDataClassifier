@@ -12,7 +12,10 @@ html, body, [data-reactroot] {
  }
 
 .image-container {
-    width: 600px;
-    height: 600px;
+    width: 500px;
+    height: 500px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
     border: 1px solid black;
 }

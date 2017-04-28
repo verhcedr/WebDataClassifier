@@ -68,9 +68,11 @@ public abstract class Utils {
         // Define headers
         List<String> columnNames = classes.stream().map(classObj -> classObj.getCname().trim()).collect(Collectors.toList());
         columnNames.add(0, "url");
+        columnNames.add("path");
         if (AppContext.INSTANCE.isValidationMode()) {
             columnNames.add("isValid");
         }
+
         // Instanciate csv printer with header
         CSVPrinter csvPrinter = CSVFormat.DEFAULT.withHeader(columnNames.toArray(new String[columnNames.size()])).print(sw);
 
@@ -83,7 +85,9 @@ public abstract class Utils {
                 for (ClassObj classObj : classes) {
                     csvPrinter.print(classObj.getCname().equals(productImage.getClassObj().getCname()) ? 1 : 0);
                 }
-
+                // Write real path
+                csvPrinter.print(productImage.getRealPath());
+                // Write validation state if needed
                 if (AppContext.INSTANCE.isValidationMode()) {
                     csvPrinter.print(productImage.isValid() ? 1 : 0);
                 }

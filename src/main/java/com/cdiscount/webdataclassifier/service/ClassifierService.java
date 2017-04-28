@@ -26,27 +26,35 @@ import java.util.regex.Pattern;
 public class ClassifierService {
 
     private static Pattern CDS_IMAGE_PATTERN = Pattern.compile("http://i..cdscdn.com/pdt2/./././(.)/");
+
     @Autowired
     private WdcProperties properties;
     private ClassObjRepository classObjRepository;
     private ProductImageRepository productImageRepository;
+
     @Autowired
     public ClassifierService(ClassObjRepository classObjRepository, ProductImageRepository productImageRepository) {
         this.classObjRepository = classObjRepository;
         this.productImageRepository = productImageRepository;
     }
 
-    public static void downloadImage(String sourceUrl, String targetDirectory) {
+    public static void downloadImage(ProductImage productImage, String targetDirectory) {
         try {
-            URL imageUrl = new URL(sourceUrl);
+            URL imageUrl = new URL(productImage.getImageUrl());
+            String realPath = buildFullPathToImage(productImage.getImageUrl(), targetDirectory);
+
             try (InputStream imageReader = new BufferedInputStream(imageUrl.openStream());
                  OutputStream imageWriter = new BufferedOutputStream(
-                         new FileOutputStream(buildFullPathToImage(sourceUrl, targetDirectory)))) {
+                         new FileOutputStream(realPath))) {
                 int readByte;
                 while ((readByte = imageReader.read()) != -1) {
                     imageWriter.write(readByte);
                 }
             }
+
+            // Update product image
+            productImage.setRealPath(realPath);
+            productImage.setImageDownloaded(true);
         } catch (IOException e) {
             throw new RuntimeException("error during image download", e);
         }
@@ -78,8 +86,7 @@ public class ClassifierService {
                 }
             // If option is enabled and class is specified, try to download image
             } else if (properties.getStorage().getDownloadImages() && !productImage.isImageDownloaded() && productImage.getClassObj() != null) {
-                downloadImage(productImage.getImageUrl(), buildImageDestinationDir(properties.getStorage().getRootPath(), productImage));
-                productImage.setImageDownloaded(true);
+                downloadImage(productImage, buildImageDestinationDir(properties.getStorage().getRootPath(), productImage));
             }
         }
         productImageRepository.save(productImage);
